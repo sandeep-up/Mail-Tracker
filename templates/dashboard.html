@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tracking Dashboard</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 20px; }
+    header { display: flex; justify-content: space-between; align-items: center; }
+    h1 { margin: 0; font-size: 1.5rem; }
+    #dateDisplay { font-size: 0.9rem; color: #666; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Mail Tracker Dashboard</h1>
+    <div id="dateDisplay">Loading…</div>
+  </header>
+
+  <!-- Future: stats cards, table, filters go here -->
+
+  <script>
+    // show current date
+    document.getElementById('dateDisplay').textContent =
+      new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  </script>
+</body>
+</html>
