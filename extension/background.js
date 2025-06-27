@@ -74,4 +74,89 @@ class TrackerService {
     }
   }
 
-  
+  async _transmit(data, attempt = 0) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 10_000);
+
+    try {
+      const body = JSON.stringify({
+        id: data.id,
+        to: data.to,
+        subject: data.subject,
+        content: data.content,
+        trackingUrl: data.trackingUrl,
+        timestamp: new Date().toISOString(),
+        status: 'sent'
+      });
+
+      const resp = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Extension-Version': '1.1.0'
+        },
+        body,
+        signal: controller.signal
+      });
+
+      clearTimeout(timer);
+      if (!resp.ok) {
+        throw new Error(`HTTP ${resp.status}`);
+      }
+
+      return resp.json();
+    } catch (err) {
+      clearTimeout(timer);
+      if (attempt < MAX_ATTEMPTS) {
+        console.log(`Attempt ${attempt + 1} for ${data.id} failed, retrying...`);
+        await new Promise(r => setTimeout(r, RETRY_DELAY / 3));
+        return this._transmit(data, attempt + 1);
+      }
+      throw err;
+    }
+  }
+
+  async _persistQueue() {
+    const items = Array.from(this.queue.entries()).map(
+      ([id, { payload, attempts }]) => ({ id, payload, attempts })
+    );
+    await browser.storage.local.set({ [STORAGE_KEY]: items });
+  }
+
+  async _retryAll() {
+    for (const [id, { payload, attempts }] of this.queue) {
+      try {
+        await this._transmit(payload);
+        this.queue.delete(id);
+        console.log(`Message ${id} sent after retry`);
+
+        await browser.storage.local.set({
+          [`tracking:${id}`]: { to: payload.to, subject: payload.subject, url: payload.trackingUrl, timestamp: new Date().toISOString(), status: 'sent' }
+        });
+      } catch (err) {
+        if (attempts + 1 >= MAX_ATTEMPTS) {
+          console.error(`Dropping ${id} after ${attempts + 1} attempts`);
+          this.queue.delete(id);
+        } else {
+          this.queue.set(id, { payload, attempts: attempts + 1 });
+          console.log(`Retry ${attempts + 1} for ${id} failed`);
+        }
+      }
+    }
+    await this._persistQueue();
+  }
+
+  async shutdown() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+    await this._persistQueue();
+  }
+}
+
+// Boot up tracker service
+const tracker = new TrackerService();
+tracker.start();
+
+// Save state when extension unloads
+browser.runtime.onSuspend.addListener(() => tracker.shutdown());
