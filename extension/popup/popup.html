@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Firefox Mail Tracker</title>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+  <style>
+    :root {
+      --background: #f8f9fa;
+      --text: #333;
+      --highlight: #4361ee;
+      --highlight-hover: #3a56d4;
+      --muted: #6c757d;
+      --muted-hover: #5a6268;
+      --success: #4caf50;
+      --error: #f44336;
+      --transition-time: 0.2s;
+    }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      width: 320px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--background);
+      color: var(--text);
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      font-size: 1.25rem;
+      color: var(--highlight);
+    }
+
+    .switch-box {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      margin-bottom: 16px;
+    }
+
+    .switch-box input {
+      transform: scale(1.2);
+      margin-right: 8px;
+    }
+
+    .status {
+      margin-left: auto;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .status.on {
+      background: rgba(46, 204, 113, 0.1);
+      color: #2ecc71;
+    }
+
+    .status.off {
+      background: rgba(231, 76, 60, 0.1);
+      color: #e74c3c;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 0.875rem;
+    }
+
+    .button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 8px;
+      border: none;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background var(--transition-time);
+      color: #fff;
+    }
+
+    .button.primary {
+      background: var(--highlight);
+    }
+
+    .button.primary:hover:not(:disabled) {
+      background: var(--highlight-hover);
+    }
+
+    .button.secondary {
+      background: var(--muted);
+    }
+
+    .button.secondary:hover:not(:disabled) {
+      background: var(--muted-hover);
+    }
+
+    .button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      color: #fff;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 1000;
+      max-width: 80%;
+      text-align: center;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    .toast.success {
+      background: var(--success);
+    }
+
+    .toast.error {
+      background: var(--error);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <i class="fas fa-envelope-open-text"></i>
+    <span>Mail Tracker</span>
+  </header>
+
+  <div class="switch-box">
+    <input type="checkbox" id="trackingToggle" />
+    <label for="trackingToggle">Enable Tracking</label>
+    <div id="statusText" class="status off">OFF</div>
+  </div>
+
+  <div class="form-group">
+    <label for="recipientEmail">Recipient Email</label>
+    <input
+      type="email"
+      id="recipientEmail"
+      placeholder="recipient@example.com"
+      aria-label="Recipient email"
+    />
+  </div>
+
+  <button id="saveBtn" class="button primary">Save Settings</button>
+  <button id="dashboardBtn" class="button secondary">Open Dashboard</button>
+
+  <script src="popup.js"></script>
+</body>
+</html>
